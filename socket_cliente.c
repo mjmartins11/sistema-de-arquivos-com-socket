@@ -34,7 +34,7 @@ int main() {
   while ((c = getchar()) != '\n' && c != EOF) {}
 
   endereco.sin_family = AF_INET; 
-  endereco.sin_port = htons(1236);
+  endereco.sin_port = htons(1237);
   endereco.sin_addr.s_addr = inet_addr("127.0.0.1");
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
@@ -44,6 +44,8 @@ int main() {
     printf("Erro ao se conectar!\n");
     return 1;
   }
+
+  //TODO: Talvez venha aqui a mensagem que envia o nome de usuario para o servidor
 
   printf("Conectado!\n\n");
 
@@ -83,6 +85,8 @@ void *enviar_mensagem(){
 void *receber_mensagem() {
   int recebidos;
   char resposta[256];
+
+  //TODO: Quando o servidor é desligado, impedir que aqui dê bug
 
   do {
     recebidos = recv(socket_cliente, resposta, 256, 0);

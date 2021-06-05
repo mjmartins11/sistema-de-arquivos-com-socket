@@ -1,2 +1,5 @@
 cliente
 servidor
+*.o
+*.out
+try
