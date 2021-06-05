@@ -7,41 +7,44 @@
 #include <netdb.h>
 #include <pthread.h>
 
-
 int sock_cliente;
-struct sockaddr_in addr;
-pthread_mutex_t mutexsum = PTHREAD_MUTEX_INITIALIZER;  
-void *sendmessage();
-void *listener();
-int done = 1; 
+struct sockaddr_in endereco;
+
+void *estabelecer_conexao();
+void *enviar_mensagem();
+void *receber_mensagem();
 
 int main() { 
-  int meu_socket;
-  meu_socket = socket(AF_INET,SOCK_STREAM,0);
+  int socket_servidor;
+  socket_servidor = socket(AF_INET, SOCK_STREAM, 0);
 
-  if (meu_socket == -1) {
+  if (socket_servidor == -1) {
     printf("\nErro ao criar o socket!\n");
     return 1;
   }
 
-  addr.sin_family      = AF_INET;
-  addr.sin_port        = htons(1234);
-  addr.sin_addr.s_addr = INADDR_ANY;
-  memset(&addr.sin_zero, 0, sizeof(addr.sin_zero));
+  endereco.sin_family = AF_INET;
+  endereco.sin_port = htons(1236);
+  endereco.sin_addr.s_addr = INADDR_ANY;
+  memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
-  if (bind(meu_socket, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-      printf("\nErro na funcao bind()\n");
-      return 1;
-    }
+  //https://www.geeksforgeeks.org/socket-programming-cc/
 
-  if (listen(meu_socket,1) == -1) {
+  //Binds the socket to the address and port number specified in addr (custom data structure)
+  if (bind(socket_servidor, (struct sockaddr*) &endereco, sizeof(endereco)) == -1) {
+    printf("\nErro na funcao bind()\n");
+    return 1;
+  }
+
+  //It puts the server socket in a passive mode, where it waits for the client to approach the server to make a connection
+  if (listen(socket_servidor, 3) == -1) {
     printf("\nErro na funcao listen()\n");
     return 1;
   }
 
   printf("\nAguardando cliente...\n");
-
-  sock_cliente = accept(meu_socket,0,0);
+  
+  sock_cliente = accept(socket_servidor,0,0);
 
   if (sock_cliente == -1) {
     printf("\nErro na funcao accept()\n");
@@ -49,21 +52,44 @@ int main() {
   }
 
   printf("\nCliente conectado!\n");
-  pthread_t threads[2];
-  void *status;
+
+  pthread_t threads[2];  
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-  pthread_create(&threads[0], &attr, sendmessage, NULL);
-  pthread_create(&threads[1], &attr, listener, NULL);
+  pthread_create(&threads[0], &attr, enviar_mensagem, NULL);
+  pthread_create(&threads[1], &attr, receber_mensagem, NULL);
 
-  while(done){}        
+  pthread_join(threads[0],NULL);
+  pthread_join(threads[1],NULL);
 
   return 0;
 }
 
-void *sendmessage() {
+void *estabelecer_conexao() {
+  // sock_cliente = accept(socket_servidor,0,0);
+
+  // if (sock_cliente == -1) {
+  //   printf("\nErro na funcao accept()\n");
+  //   return 1;
+  // }
+
+  // printf("\nCliente conectado!\n");
+
+  // pthread_t threads[2];  
+  // pthread_attr_t attr;
+  // pthread_attr_init(&attr);
+  // pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+  // pthread_create(&threads[0], &attr, enviar_mensagem, NULL);
+  // pthread_create(&threads[1], &attr, receber_mensagem, NULL);
+
+  // pthread_join(threads[0],NULL);
+  // pthread_join(threads[1],NULL);
+}
+
+void *enviar_mensagem() {
   int  enviados;
   char mensagem[256];
 
@@ -73,9 +99,11 @@ void *sendmessage() {
     mensagem[strlen(mensagem)-1] = '\0';
     enviados = send(sock_cliente, mensagem, strlen(mensagem), 0);
   } while(strcmp(mensagem,"exit") != 0);
+
+  pthread_exit(NULL);
 }
 
-void *listener() {
+void *receber_mensagem() {
   int recebidos;
   char resposta[256];
 
@@ -85,7 +113,5 @@ void *listener() {
     printf("\n Cliente: %s\n",resposta);
   } while(strcmp(resposta, "exit")!=0); 
 
-  pthread_mutex_destroy(&mutexsum);
   pthread_exit(NULL);
-  done = 0;
 }
