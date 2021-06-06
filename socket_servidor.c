@@ -9,6 +9,11 @@
 
 #define SAIR 4
 
+typedef struct {
+  int socket_cliente;
+  pthread_t *enviar_mensagem;
+} conexao;
+
 void *enviar_mensagem(void * socket_cliente);
 void *receber_mensagem(void * socket_cliente);
 
@@ -24,7 +29,7 @@ int main() {
   }
 
   endereco.sin_family = AF_INET;
-  endereco.sin_port = htons(1235);
+  endereco.sin_port = htons(1236);
   endereco.sin_addr.s_addr = INADDR_ANY;
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
@@ -48,6 +53,7 @@ int main() {
     printf("\nAguardando cliente...\n");
 
     int socket_cliente = accept(socket_servidor, 0, 0);
+    printf("socket_cliente: %p\n", &socket_cliente);
     if (socket_cliente == -1) {
       printf("\nErro na funcao accept()\n");
       return 1;
@@ -58,9 +64,24 @@ int main() {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    pthread_t threads[2];
-    pthread_create(&threads[0], &attr, enviar_mensagem, (void *) &socket_cliente);
-    pthread_create(&threads[1], &attr, receber_mensagem, (void *) &socket_cliente);
+    pthread_t thread1;
+    pthread_t thread2;
+
+    printf("thread 2: %p\n", &thread2);
+  
+    // pthread_t threads[2];
+    // pthread_create(&threads[0], &attr, enviar_mensagem, (void *) &socket_cliente);
+    // pthread_create(&threads[1], &attr, receber_mensagem, (void *) &socket_cliente);
+
+    pthread_create(&thread1, &attr, enviar_mensagem, (void *) &socket_cliente);
+    
+    printf("criacao da socket: %p\n", &thread1);
+
+    conexao con;
+    con.socket_cliente = socket_cliente;
+    con.enviar_mensagem = &thread1;
+    // pthread_create(&threads[1], &attr, receber_mensagem, (void *) &con);
+    pthread_create(&thread2, &attr, receber_mensagem, (void *) &con);
   }
   
   return 0;
@@ -68,7 +89,7 @@ int main() {
 
 void *enviar_mensagem(void * argumento) {
   int socket_cliente =  * (int *) argumento;
-  
+
   int enviados;
   char mensagem[256];
 
@@ -90,7 +111,12 @@ void *enviar_mensagem(void * argumento) {
 }
 
 void *receber_mensagem(void * argumento) {
-  int socket_cliente =  * (int *) argumento;
+  // int socket_cliente =  * (int *) argumento;
+  conexao con =  * (conexao *) argumento;
+  int socket_cliente = con.socket_cliente;
+  pthread_t *enviar_mensagem_thread = con.enviar_mensagem;
+
+  printf("id: %d and thread: %p\n", socket_cliente, enviar_mensagem_thread);
 
   int recebidos;
   char resposta[256];
@@ -111,5 +137,7 @@ void *receber_mensagem(void * argumento) {
   printf("\nexit receber_mensagem\n");
   
   //TODO (4): Quando essa thread morrer, a do enviar_mensagem também deve morrer
+  pthread_cancel(*enviar_mensagem_thread);
+  printf("cancelou a thread de enviar\n");
   pthread_exit(NULL);
 }
