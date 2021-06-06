@@ -18,7 +18,7 @@ void *enviar_mensagem();
 void *receber_mensagem();
 
 int main() {
-                 //Protocolo IPv4       TCP     IP
+  //               Protocolo IPv4       TCP     IP
   socket_cliente = socket(AF_INET, SOCK_STREAM, 0);
 
   if(socket_cliente == -1) {
@@ -34,7 +34,7 @@ int main() {
   while ((c = getchar()) != '\n' && c != EOF) {}
 
   endereco.sin_family = AF_INET; 
-  endereco.sin_port = htons(1236);
+  endereco.sin_port = htons(1237);
   endereco.sin_addr.s_addr = inet_addr("127.0.0.1");
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
@@ -43,55 +43,50 @@ int main() {
   if(connect(socket_cliente, (struct sockaddr*) &endereco, sizeof(endereco)) == -1) {
     printf("Erro ao se conectar!\n");
     return 1;
+  }
 
-_attr_t atr;
-  pthread_attr_init(&attr);
-  pthread_attr_setetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  //TODO: Talvez venha aqui a mensagem que envia o nome de usuario para o servidor
 
-  pthread_create(&threads[0], &attr, enviar_mensagem, NULL);
-  p
+  printf("Conectado!\n\n");
 
-  printf("\nCliente conectado!\n");
-
-  pthread_t threads[2];  thread_create(&threads[1], &attr, receber_mensagem, NULL);
+  pthread_t threads[2];
   pthread_attr_t attr;
   pthread_attr_init(&attr);
-  pthread_attp_setdttachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-  phhread_create(&threads[0], &attr, enviar_mensagem, NULL);
+  pthread_create(&threads[0], &attr, enviar_mensagem, NULL);
   pthread_create(&threads[1], &attr, receber_mensagem, NULL);
 
-  pthread_join(threads[0],NULL);
-  pthread_join(threads[1],NULL);
-
-  retread_join(threads[0],NULL);
-  pthread_join(threads[1],NULL);
+  pthread_join(threads[0], NULL);
+  pthread_join(threads[1], NULL);
 
   return 0;
- }//
+}
 
- i//nt conexao_finalizada_pelo_cliente = 0;
- //
- v//oid *enviar_mensagem(){
-  // int enviados;
+int conexao_finalizada_pelo_cliente = 0;
+
+void *enviar_mensagem(){
+  int enviados;
   char mensagem[256];
- //
+
   do {  
-  //   printf("Digite uma mensagem: ");
-  //   fgets(mensagem, 256, stdin);
-  //   mensagem[strlen(mensagem)-1] = '\0';
-  //   enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+    printf("Digite uma mensagem: ");
+    fgets(mensagem, 256, stdin);
+    mensagem[strlen(mensagem)-1] = '\0';
+    enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
   } while(strcmp(mensagem, "exit") != 0);
- //
-  // conexao_finalizada_pelo_cliente = 1;
+
+  conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       
- //
-  // pthread_exit(NULL);
+
+  pthread_exit(NULL);
 }
 
 void *receber_mensagem() {
   int recebidos;
   char resposta[256];
+
+  //TODO: Quando o servidor é desligado, impedir que aqui dê bug
 
   do {
     recebidos = recv(socket_cliente, resposta, 256, 0);
