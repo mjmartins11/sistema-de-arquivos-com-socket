@@ -6,6 +6,8 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <string.h>
+#include <semaphore.h>
+#include "lista.h"
 
 #define TAMANHO_TEXTO 32
 
@@ -34,7 +36,7 @@ int main() {
   while ((c = getchar()) != '\n' && c != EOF) {}
 
   endereco.sin_family = AF_INET; 
-  endereco.sin_port = htons(1237);
+  endereco.sin_port = htons(1235);
   endereco.sin_addr.s_addr = inet_addr("127.0.0.1");
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
@@ -65,16 +67,73 @@ int main() {
 
 int conexao_finalizada_pelo_cliente = 0;
 
+void escolher_opcao(char input[1]){
+    char nome_do_cliente[TAMANHO_TEXTO];
+    char titulo[TAMANHO_TEXTO];
+    char conteudo[TAMANHO_CONTEUDO];
+    char titulo_aux[TAMANHO_TEXTO]; 
+    int enviados;
+    char mensagem[TAMANHO_TEXTO];
+    int opc = atoi(input);
+
+    //Limpando o ENTER do buffer
+    char c;
+    while ((c = getchar()) != '\n' && c != EOF) {}
+
+    switch (opc){
+      case 0:     
+        printf("Qual o seu nome?\n");
+        fgets(mensagem, TAMANHO_TEXTO, stdin);
+        mensagem[strlen(mensagem)-1] = '\0';
+        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+        printf("Insira o titulo do documento\n");
+        fgets(mensagem, TAMANHO_TEXTO, stdin);
+        mensagem[strlen(mensagem)-1] = '\0';
+        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+        printf("Insira o conteudo do documento\n");
+        fgets(mensagem, TAMANHO_CONTEUDO, stdin);
+        mensagem[strlen(mensagem)-1] = '\0';
+        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+        break;
+
+      case 1:
+        /* tratar no servidor
+        lista_imprimir(l);*/
+        break;
+
+      case 2:
+        printf("Qual o titulo a ser removido?\n");
+        fgets(mensagem, 256, stdin);
+        mensagem[strlen(mensagem)-1] = '\0';
+        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+        /*tratar no servidor
+        lista_remover_documento(l, titulo_aux);*/
+        break;
+
+      case 3: 
+        printf("Qual o titulo escolhido?\n");
+        fgets(mensagem, 256, stdin);
+        mensagem[strlen(mensagem)-1] = '\0';
+        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+        /* tratar no servidor
+        lista_buscar_e_imprimir(l, titulo_aux);
+        */
+        break;
+    }
+}
+
 void *enviar_mensagem(){
   int enviados;
-  char mensagem[256];
+  char mensagem[1];
 
-  do {  
-    printf("Digite uma mensagem: ");
-    fgets(mensagem, 256, stdin);
-    mensagem[strlen(mensagem)-1] = '\0';
-    enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-  } while(strcmp(mensagem, "exit") != 0);
+  do{
+    printf("Escolha uma opcao do menu! ");
+    scanf("%c", mensagem);
+    enviados = send(socket_cliente, mensagem, 1, 0);
+
+    if(strcmp(mensagem, "4") != 0) 
+      escolher_opcao(mensagem);
+  } while(strcmp(mensagem, "4") != 0);
 
   conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       

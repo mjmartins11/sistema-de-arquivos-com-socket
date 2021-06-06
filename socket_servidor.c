@@ -6,6 +6,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <semaphore.h>
+#include "lista.h"
 
 #define SAIR 4
 
@@ -24,7 +26,7 @@ int main() {
   }
 
   endereco.sin_family = AF_INET;
-  endereco.sin_port = htons(1237);
+  endereco.sin_port = htons(1235);
   endereco.sin_addr.s_addr = INADDR_ANY;
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
@@ -66,28 +68,15 @@ int main() {
   return 0;
 }
 
-void *enviar_menu(void * argumento) {
-  int socket_cliente =  * (int *) argumento;
-  
-  int enviados;
-  char mensagem[228] = "\n************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - inserir documento\nOpcao 1 - imprimir todos os documentos\nOpcao 2 - remover documento\nOpcao 3 - buscar documento\nOpcao 4 - sair\n";
-
-  mensagem[strlen(mensagem)-1] = '\0';
-  enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-
-  printf("\nmenu enviado\n");
-
-  pthread_exit(NULL);
-}
-
-
 void *enviar_mensagem(void * argumento) {
   int socket_cliente =  * (int *) argumento;
   
   int enviados;
   char mensagem[256];
 
-  //TODO: Talvez aqui que tenha que enviar a mensagem com o menu pro usuário com as opções (cadastrar arquivo, consultar, listar, etc...)
+  //Enviando o menu para o cliente
+  char menu[228] = "\n************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - inserir documento\nOpcao 1 - imprimir todos os documentos\nOpcao 2 - remover documento\nOpcao 3 - buscar documento\nOpcao 4 - sair\n";
+  enviados = send(socket_cliente, menu, strlen(menu), 0);
 
   do {  
     printf("Server: ");
