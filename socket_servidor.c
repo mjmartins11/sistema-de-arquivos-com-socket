@@ -7,6 +7,8 @@
 #include <netdb.h>
 #include <pthread.h>
 
+#define SAIR 4
+
 void *enviar_mensagem(void * socket_cliente);
 void *receber_mensagem(void * socket_cliente);
 
@@ -64,6 +66,23 @@ int main() {
   return 0;
 }
 
+void *enviar_menu(void * argumento) {
+  int socket_cliente =  * (int *) argumento;
+  
+  int enviados;
+  int opc;
+  char mensagem[228] = "************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - inserir documento\nOpcao 1 - imprimir todos os documentos\nOpcao 2 - remover documento\nOpcao 3 - buscar documento\nOpcao 4 - sair\n";
+
+  scanf("%d", &opc);
+  mensagem[strlen(mensagem)-1] = '\0';
+  enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+
+  printf("\nmenu enviado\n");
+
+  pthread_exit(NULL);
+}
+
+
 void *enviar_mensagem(void * argumento) {
   int socket_cliente =  * (int *) argumento;
   
@@ -71,6 +90,7 @@ void *enviar_mensagem(void * argumento) {
   char mensagem[256];
 
   //TODO: Talvez aqui que tenha que enviar a mensagem com o menu pro usuário com as opções (cadastrar arquivo, consultar, listar, etc...)
+  enviar_menu(argumento);
 
   do {  
     printf("Server: ");
