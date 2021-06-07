@@ -69,7 +69,7 @@ void receber_mensagem(int socket_cliente) {
   if(retorno == 0) 
     return;
   mensagem[retorno] = '\0';
-  
+
   printf("\n%s\n\n", mensagem);
 }
 
@@ -96,7 +96,7 @@ void *conexao() {
   mensagem[retorno] = '\0';
   printf("\n%s\n", mensagem);
 
-  printf("Digite a operação: ");
+  printf(">> Digite a operação: ");
   scanf("%c", &operacao);
   limpar_buffer();
 
@@ -123,14 +123,40 @@ void *conexao() {
 
         printf("\n");
         break;
+
       case '1':
         printf("\n");
         break;
+
+      case '2':
+        //Recebendo "Qual o titulo a ser removido?"
+        receber_mensagem(socket_cliente);
+        //Respondendo o titulo
+        enviar_mensagem(socket_cliente);
+
+        //Recebendo resultado da operação
+        receber_mensagem(socket_cliente);
+
+        printf("\n");
+        break;
+
+      case '3':
+        //Recebendo "Qual o titulo desejado?"
+        receber_mensagem(socket_cliente);
+        //Respondendo o titulo
+        enviar_mensagem(socket_cliente);
+
+        //Recebendo resultado da operação
+        receber_mensagem(socket_cliente);
+
+        printf("\n");
+        break;
+
       default:
         receber_mensagem(socket_cliente);
     }
 
-    printf("Digite a operação: ");
+    printf(">> Digite a operação: ");
     scanf("%c", &operacao);
     limpar_buffer();
   }
