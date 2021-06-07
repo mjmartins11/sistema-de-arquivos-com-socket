@@ -7,6 +7,8 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <string.h>
+#include <semaphore.h>
+#include "lista.h"
 
 #define TAMANHO_TEXTO 32
 
@@ -15,7 +17,7 @@ char nome[TAMANHO_TEXTO];
 int socket_cliente;
 struct sockaddr_in endereco; //Estrutura usada com enderecos IPv4 (https://www.gta.ufrj.br/ensino/eel878/sockets/sockaddr_inman.html)
 
-void *enviar_mensagem();
+void *enviar_mensagem(void * argumento);
 void *receber_mensagem();
 
 int main() {
@@ -35,8 +37,8 @@ int main() {
   while ((c = getchar()) != '\n' && c != EOF) {}
 
   endereco.sin_family = AF_INET; 
-  endereco.sin_port = htons(1235);
-  endereco.sin_addr.s_addr = inet_addr("127.0.0.1");
+  endereco.sin_port = htons(1236);
+  endereco.sin_addr.s_addr, nome_cliente = inet_addr("127.0.0.1");
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 
   printf("Tentando se conectar ao servidor...\n");
@@ -55,8 +57,8 @@ int main() {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-  pthread_create(&threads[0], &attr, enviar_mensagem, NULL);
   pthread_create(&threads[1], &attr, receber_mensagem, NULL);
+  pthread_create(&threads[0], &attr, enviar_mensagem, (void *) &threads[1]);
 
   pthread_join(threads[0], NULL);
   pthread_join(threads[1], NULL);
@@ -66,20 +68,22 @@ int main() {
 
 int conexao_finalizada_pelo_cliente = 0;
 
-void *enviar_mensagem(){
+void *enviar_mensagem(void * argumento){
+  pthread_t *receber_mensagem_thread = (pthread_t *) argumento;
   int enviados;
   char mensagem[256];
 
-  do {  
-    printf("Escolha uma opcao: ");
+  do {
+    printf("Escolher uma opcao: ");
     fgets(mensagem, 256, stdin);
     mensagem[strlen(mensagem)-1] = '\0';
-    enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
+    enviados = send(socket_cliente, &mensagem, sizeof(char), 0);
   } while(mensagem[0] != '4');
 
   conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       
-
+  //pthread_cancel(*receber_mensagem_thread);
+  printf("cancelou a thread de enviar\n");
   pthread_exit(NULL);
 }
 
@@ -91,6 +95,8 @@ void *receber_mensagem() {
 
   do {
     recebidos = recv(socket_cliente, resposta, 256, 0);
+    if(recebidos == 0) 
+      break;
     resposta[recebidos] = '\0';
     printf("\nResposta do servidor: %s\n", resposta);
   } while(recebidos != -1 && !conexao_finalizada_pelo_cliente); 
