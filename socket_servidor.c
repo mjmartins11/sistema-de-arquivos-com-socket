@@ -7,6 +7,8 @@
 #include <netdb.h>
 #include <pthread.h>
 
+#include "lista.h"
+
 #define SAIR 4
 
 void *enviar_mensagem(void * socket_cliente);
@@ -66,19 +68,21 @@ int main() {
   return 0;
 }
 
+
+
 void *enviar_mensagem(void * argumento) {
   int socket_cliente =  * (int *) argumento;
-  
+
   int enviados;
   char mensagem[256];
 
   //Enviando o menu para o cliente
-  char menu[228] = "************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - inserir documento\nOpcao 1 - imprimir todos os documentos\nOpcao 2 - remover documento\nOpcao 3 - buscar documento\nOpcao 4 - sair\n";
+  char menu[228] = "\n************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - Inserir documento\nOpcao 1 - Imprimir todos os documentos\nOpcao 2 - Remover documento\nOpcao 3 - Buscar documento\nOpcao 4 - Sair\n";
   enviados = send(socket_cliente, menu, strlen(menu), 0);
 
   do {  
     printf("Server: ");
-    fgets(mensagem, 256, stdin);
+    fgets(mensagem, 256, stdin); // lendo a mensagem do servidor para enviar ao cliente
     mensagem[strlen(mensagem)-1] = '\0';
     //TODO: Ao enviar send para um cliente que já morreu, isso aqui dá problema e faz o código parar -> TODO (4)
     enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
@@ -89,24 +93,78 @@ void *enviar_mensagem(void * argumento) {
   pthread_exit(NULL);
 }
 
+void escolher_opcao(char resposta, int socket_cliente) {
+  char mensagem[32];
+  switch(resposta){
+    case '0':   
+      printf("opa, entrou no 0\n");
+      /*printf("Qual o seu nome?\n");
+      scanf(" %[^\n]s", nome_do_cliente);
+      nome_do_cliente[strlen(nome_do_cliente)] = '\0';
+      printf("Insira o titulo do documento\n");
+      scanf(" %[^\n]s", titulo);
+      titulo[strlen(titulo)] = '\0';
+      printf("Insira o conteudo do documento\n");
+      scanf(" %[^\n]s", conteudo);
+      conteudo[strlen(conteudo)] = '\0';
+      lista_inserir(l, nome_do_cliente, titulo, conteudo);*/
+      break;
+
+    case '1':
+    printf("opa, entrou no 1\n");
+      /*lista_imprimir(l);*/
+      break;
+
+    case '2':
+    printf("opa, entrou no 2\n");
+      /*printf("Qual o titulo a ser removido?\n");
+      scanf(" %[^\n]s", titulo_aux);
+      titulo_aux[strlen(titulo_aux)] = '\0';
+      lista_remover_documento(l, titulo_aux);*/
+      break;
+
+    case '3': 
+      printf("opa, entrou no 3\n");
+      /*printf("Qual o titulo desejado?\n");
+      scanf(" %[^\n]s", titulo_aux);
+      titulo_aux[strlen(titulo_aux)] = '\0';
+      lista_buscar_e_imprimir(l, titulo_aux);*/
+      break;
+
+    case '4':
+      //lista_sair(l);
+      //in_code = false;
+      break;
+      
+    default:
+      strcpy(mensagem, "Escolha de opcao invalida\0");
+      send(socket_cliente, mensagem, strlen(mensagem), 0);
+  }
+}
+
 void *receber_mensagem(void *argumento) {
   int socket_cliente =  *(int *) argumento;
 
   int recebidos;
-  char resposta[256];
+  char resposta;
 
   do {
-    recebidos = recv(socket_cliente, resposta, 256, 0);
+    recebidos = recv(socket_cliente, &resposta, sizeof(char), 0);
     if(recebidos == 0) //Conexão finalizada, pois o servidor recebeu um FIN (https://stackoverflow.com/a/3203663/13274909)
       break;
 
-    resposta[recebidos] = '\0';
-    printf("\n Cliente: %s\n", resposta);
+    //printf("resposta: %d\n", resposta);
+
+    //resposta[recebidos] = '\0';
+
+    escolher_opcao(resposta, socket_cliente);
+
+    printf("\n Cliente: %d\n", resposta);
     //TODO: Aqui o servidor recebe a mensagem do cliente e ela deve ser processada 
     //Nota: terão várias threads executando essa função, ou seja, provavelmente será necessário utilizar um mutex no acesso a lista
     //Assim, como o mutex, evita da lista ser acessada errada
   
-  } while(strcmp(resposta, "exit")!=0); 
+  } while(resposta != '4'); 
 
   printf("\nexit receber_mensagem\n");
   

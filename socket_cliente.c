@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -70,11 +71,11 @@ void *enviar_mensagem(){
   char mensagem[256];
 
   do {  
-    printf("Digite uma mensagem: ");
+    printf("Escolha uma opcao: ");
     fgets(mensagem, 256, stdin);
     mensagem[strlen(mensagem)-1] = '\0';
     enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-  } while(strcmp(mensagem, "exit") != 0);
+  } while(mensagem[0] != '4');
 
   conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       
