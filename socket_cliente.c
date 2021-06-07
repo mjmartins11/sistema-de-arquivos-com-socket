@@ -21,7 +21,7 @@ void *enviar_mensagem(void * argumento);
 void *receber_mensagem();
 
 int main() {
-  //               Protocolo IPv4       TCP     IP
+  // Protocolo IPv4 TCP IP
   socket_cliente = socket(AF_INET, SOCK_STREAM, 0);
 
   if(socket_cliente == -1) {
@@ -68,75 +68,18 @@ int main() {
 
 int conexao_finalizada_pelo_cliente = 0;
 
-void escolher_opcao(char* input){
-    char nome_do_cliente[TAMANHO_TEXTO];
-    char titulo[TAMANHO_TEXTO];
-    char conteudo[TAMANHO_CONTEUDO];
-    char titulo_aux[TAMANHO_TEXTO]; 
-    int enviados;
-    char mensagem[TAMANHO_TEXTO];
-    //int opc = atoi(input[0]);
-
-    //Limpando o ENTER do buffer
-    char c;
-    while ((c = getchar()) != '\n' && c != EOF) {}
-
-    switch (input[0]){
-      case 0:     
-        printf("Qual o seu nome?\n");
-        fgets(mensagem, TAMANHO_TEXTO, stdin);
-        mensagem[strlen(mensagem)-1] = '\0';
-        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-        printf("Insira o titulo do documento\n");
-        fgets(mensagem, TAMANHO_TEXTO, stdin);
-        mensagem[strlen(mensagem)-1] = '\0';
-        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-        printf("Insira o conteudo do documento\n");
-        fgets(mensagem, TAMANHO_CONTEUDO, stdin);
-        mensagem[strlen(mensagem)-1] = '\0';
-        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-        break;
-
-      case 1:
-        /* tratar no servidor
-        lista_imprimir(l);*/
-        break;
-
-      case 2:
-        printf("Qual o titulo a ser removido?\n");
-        fgets(mensagem, 256, stdin);
-        mensagem[strlen(mensagem)-1] = '\0';
-        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-        /*tratar no servidor
-        lista_remover_documento(l, titulo_aux);*/
-        break;
-
-      case 3: 
-        printf("Qual o titulo escolhido?\n");
-        fgets(mensagem, 256, stdin);
-        mensagem[strlen(mensagem)-1] = '\0';
-        enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
-        /* tratar no servidor
-        lista_buscar_e_imprimir(l, titulo_aux);
-        */
-        break;
-    }
-}
-
 void *enviar_mensagem(void * argumento){
   pthread_t *receber_mensagem_thread = (pthread_t *) argumento;
   int enviados;
-  char *mensagem = (char*) malloc(sizeof(char) * 4);
+  char mensagem[256];
 
   do{
-    printf("Escolhendo opcao do menu!");
-    scanf("%c", &mensagem[0]);
-    strcat(mensagem, "$$$"); 
+    printf("Cliente:\n");
+    fgets(mensagem, 256, stdin); // lendo a mensagem do servidor para enviar ao cliente
+    mensagem[strlen(mensagem)-1] = '\0';
+    printf("%s\n", mensagem);
     enviados = send(socket_cliente, mensagem, 1, 0);
-
-    if(strcmp(mensagem, "4") != 0) 
-      escolher_opcao(mensagem);
-  } while(strcmp(mensagem, "4") != 0);
+  } while(strcmp(mensagem, "exit") != 0);
 
   conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       

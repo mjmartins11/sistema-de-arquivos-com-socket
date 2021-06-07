@@ -13,6 +13,7 @@
 #define SAIR 4
 
 Lista *l;
+sem_t mutex;
 
 typedef struct {
   int socket_cliente;
@@ -29,6 +30,8 @@ int main() {
   int socket_servidor;
   struct sockaddr_in endereco;
   l = lista_criar();
+
+  sem_init(&mutex, 0, 1);
 
   socket_servidor = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -56,8 +59,6 @@ int main() {
     return 1;
   }
 
-  //l = lista_criar();
-
   //https://www.di.ubi.pt/~operativos/praticos/html/9-threads.html
   //https://www.ppgia.pucpr.br/~laplima/ensino/sd/lab/lab-02-sock.html
   while(1) {
@@ -82,6 +83,8 @@ int main() {
     // pthread_t thread;
     // pthread_create(&thread, &attr, conexao, (void *) &socket_cliente);
   }
+
+  sem_destroy(&mutex);
   
   return 0;
 }
@@ -99,7 +102,7 @@ void *conexao(void * argumento) {
   //Aguardando resposta do cliente
   retorno = recv(socket_cliente, resposta, 256, 0);
   if(retorno == 0) //Conexão finalizada pois o servidor recebeu um FIN (https://stackoverflow.com/a/3203663/13274909)
-    //break;
+    pthread_exit(NULL);        // era para ser um break mesmo? pois nao ha ciclo aqui
   resposta[retorno] = '\0';
 
   //Definindo a operação
@@ -191,22 +194,34 @@ void escolher_opcao(char resposta, int socket_cliente) {
   char titulo[TAMANHO_TEXTO], titulo_aux[TAMANHO_TEXTO];
   char conteudo[TAMANHO_CONTEUDO];
   char mensagem[TAMANHO_TEXTO];
+  int recebidos;
 
   switch(resposta){
     case '0':   
       strcpy(mensagem, "Qual o seu nome?");
       send(socket_cliente, mensagem, TAMANHO_TEXTO, 0);
-      recv(socket_cliente, nome_do_cliente, TAMANHO_TEXTO, 0);
-      //printf("%s\n", nome_do_cliente);
+      recebidos = recv(socket_cliente, nome_do_cliente, TAMANHO_TEXTO, 0);
       //scanf(" %[^\n]s", nome_do_cliente);
-      nome_do_cliente[strlen(nome_do_cliente)] = '\0';
-      printf("Insira o titulo do documento\n");
-      scanf(" %[^\n]s", titulo);
+      nome_do_cliente[recebidos] = '\0';
+      printf("%s\n", nome_do_cliente);
+
+      strcpy(mensagem, "Insira o titulo do documento");
+      send(socket_cliente, mensagem, TAMANHO_TEXTO, 0);
+      recv(socket_cliente, titulo, TAMANHO_TEXTO, 0);
+      //scanf(" %[^\n]s", titulo);
       titulo[strlen(titulo)] = '\0';
-      printf("Insira o conteudo do documento\n");
-      scanf(" %[^\n]s", conteudo);
+      printf("%s\n", titulo);
+
+      strcpy(mensagem, "Insira o conteudo do documento");
+      send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
+      recv(socket_cliente, conteudo, TAMANHO_CONTEUDO, 0);
+      //scanf(" %[^\n]s", conteudo);
       conteudo[strlen(conteudo)] = '\0';
+      printf("%s\n", conteudo);
+
+      sem_wait(&mutex);
       lista_inserir(l, nome_do_cliente, titulo, conteudo);
+      sem_post(&mutex);
       break;
 
     case '1':
@@ -217,7 +232,9 @@ void escolher_opcao(char resposta, int socket_cliente) {
       printf("Qual o titulo a ser removido?\n");
       scanf(" %[^\n]s", titulo_aux);
       titulo_aux[strlen(titulo_aux)] = '\0';
+      sem_wait(&mutex);
       lista_remover_documento(l, titulo_aux);
+      sem_post(&mutex);
       break;
 
     case '3': 
@@ -235,4 +252,6 @@ void escolher_opcao(char resposta, int socket_cliente) {
       strcpy(mensagem, "Escolha de opcao invalida\0");
       send(socket_cliente, mensagem, strlen(mensagem), 0);
   }
+
+  return;
 }
