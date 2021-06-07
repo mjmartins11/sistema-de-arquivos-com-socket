@@ -70,13 +70,13 @@ int main() {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    pthread_t thread_enviar_mensagem;
-    pthread_t thread_receber_mensagem;
-    pthread_create(&thread_enviar_mensagem, &attr, enviar_mensagem, (void *) &socket_cliente);
-    pthread_create(&thread_receber_mensagem, &attr, receber_mensagem, (void *) &socket_cliente);
+    // pthread_t thread_enviar_mensagem;
+    // pthread_t thread_receber_mensagem;
+    // pthread_create(&thread_enviar_mensagem, &attr, enviar_mensagem, (void *) &socket_cliente);
+    // pthread_create(&thread_receber_mensagem, &attr, receber_mensagem, (void *) &socket_cliente);
 
-    // pthread_t thread;
-    // pthread_create(&thread, &attr, conexao, (void *) &socket_cliente);
+    pthread_t thread;
+    pthread_create(&thread, &attr, conexao, (void *) &socket_cliente);
   }
   
   return 0;
@@ -84,9 +84,10 @@ int main() {
 
 void *conexao(void * argumento) {
   int socket_cliente =  * (int *) argumento;
-  char resposta[256];
-  char operacao;
   int retorno;
+  char resposta[256];
+  char mensagem[256] = "\n Mensagem... \n";
+  char operacao;
 
   //Enviando o menu para o cliente
   char menu[228] = "\n************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - Inserir documento\nOpcao 1 - Imprimir todos os documentos\nOpcao 2 - Remover documento\nOpcao 3 - Buscar documento\nOpcao 4 - Sair\n";
@@ -95,7 +96,7 @@ void *conexao(void * argumento) {
   //Aguardando resposta do cliente
   retorno = recv(socket_cliente, resposta, 256, 0);
   if(retorno == 0) //Conexão finalizada pois o servidor recebeu um FIN (https://stackoverflow.com/a/3203663/13274909)
-    break;
+    pthread_exit(NULL);
   resposta[retorno] = '\0';
 
   //Definindo a operação
@@ -106,8 +107,8 @@ void *conexao(void * argumento) {
     // escolher_opcao(operacao, socket_cliente);
     printf("Realizando operação %c\n", operacao);
     
-    //Retornando resultado para o cliente
-    //retorno = send(socket_cliente, mensagem, strlen(mensagem), 0); 
+    // Retornando resultado para o cliente
+    retorno = send(socket_cliente, mensagem, strlen(mensagem), 0); 
 
     //Aguardando resposta do cliente
     retorno = recv(socket_cliente, resposta, 256, 0);
@@ -118,6 +119,8 @@ void *conexao(void * argumento) {
     //Definindo a operação
     operacao = resposta[0];
   }
+
+  printf("matando thread\n");
 
   pthread_exit(NULL);
 }

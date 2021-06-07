@@ -19,6 +19,7 @@ struct sockaddr_in endereco; //Estrutura usada com enderecos IPv4 (https://www.g
 
 void *enviar_mensagem(void * argumento);
 void *receber_mensagem();
+void *conexao();
 
 int main() {
   //               Protocolo IPv4       TCP     IP
@@ -57,11 +58,16 @@ int main() {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-  pthread_create(&threads[1], &attr, receber_mensagem, NULL);
-  pthread_create(&threads[0], &attr, enviar_mensagem, (void *) &threads[1]);
+  // pthread_create(&threads[1], &attr, receber_mensagem, NULL);
+  // pthread_create(&threads[0], &attr, enviar_mensagem, (void *) &threads[1]);
 
-  pthread_join(threads[0], NULL);
-  pthread_join(threads[1], NULL);
+  // pthread_join(threads[0], NULL);
+  // pthread_join(threads[1], NULL);
+
+    pthread_t thread;
+    pthread_create(&thread, &attr, conexao, (void *) &socket_cliente);
+
+    pthread_join(thread, NULL);
 
   return 0;
 }
@@ -100,6 +106,44 @@ void *receber_mensagem() {
     resposta[recebidos] = '\0';
     printf("\nResposta do servidor: %s\n", resposta);
   } while(recebidos != -1 && !conexao_finalizada_pelo_cliente); 
+
+  pthread_exit(NULL);
+}
+
+void *conexao() {
+  int retorno;
+  char resposta[256];
+  char mensagem[256];
+  char operacao;
+
+  //Recebendo mensagem do servidor
+  retorno = recv(socket_cliente, resposta, 256, 0);
+  if(retorno == 0) 
+    pthread_exit(NULL);
+  resposta[retorno] = '\0';
+  printf("\nResposta do servidor: %s\n", resposta);
+
+  //Lendo operação
+  fgets(mensagem, 256, stdin);
+  mensagem[strlen(mensagem)-1] = '\0';
+  operacao = mensagem[0];
+
+  while(operacao != '4') {
+    //Enviando mensagem para o servidor
+    retorno = send(socket_cliente, &mensagem, sizeof(char), 0);
+
+    //Recebendo mensagem do servidor
+    retorno = recv(socket_cliente, resposta, 256, 0);
+    if(retorno == 0) 
+        break;
+    resposta[retorno] = '\0';
+    printf("\nResposta do servidor: %s\n", resposta);
+
+    //Lendo operação
+    fgets(mensagem, 256, stdin);
+    mensagem[strlen(mensagem)-1] = '\0';
+    operacao = mensagem[0];
+  }
 
   pthread_exit(NULL);
 }
