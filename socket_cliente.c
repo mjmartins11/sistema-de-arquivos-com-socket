@@ -34,7 +34,7 @@ int main() {
   while ((c = getchar()) != '\n' && c != EOF) {}
 
   endereco.sin_family = AF_INET; 
-  endereco.sin_port = htons(1236);
+  endereco.sin_port = htons(1235);
   endereco.sin_addr.s_addr = inet_addr("127.0.0.1");
   memset(&endereco.sin_zero, 0, sizeof(endereco.sin_zero));
 

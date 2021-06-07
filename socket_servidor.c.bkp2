@@ -12,8 +12,8 @@
 
 typedef struct {
   int socket_cliente;
-  int continua_execucao;
-} THREAD_CONTROLE;
+  pthread_t *thread;
+} CONEXAO;
 
 void *enviar_mensagem(void * argumento);
 void *receber_mensagem(void * argumento);
@@ -64,12 +64,16 @@ int main() {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    int 
+    pthread_t *thread1 = malloc(sizeof(pthread_t));
+    pthread_t *thread2 = malloc(sizeof(pthread_t));
 
-    pthread_t thread_enviar_mensagem;
-    pthread_t thread_receber_mensagem;
-    pthread_create(&thread_enviar_mensagem, &attr, enviar_mensagem, (void *) &socket_cliente);
-    pthread_create(&thread_receber_mensagem, &attr, receber_mensagem, (void *) &socket_cliente);
+    printf("thread1: %p e thread2: %p\n", thread1, thread2);
+
+    pthread_create(thread1, &attr, enviar_mensagem, (void *) &socket_cliente);
+    CONEXAO conexao;
+    conexao.socket_cliente = socket_cliente;
+    conexao.thread = thread1;
+    pthread_create(thread2, &attr, receber_mensagem, (void *) &conexao);
   }
   
   return 0;
@@ -101,7 +105,11 @@ void *enviar_mensagem(void * argumento) {
 }
 
 void *receber_mensagem(void * argumento) {
-  int socket_cliente =  * (int *) argumento;
+  CONEXAO conexao =  * (CONEXAO *) argumento;
+  int socket_cliente = conexao.socket_cliente;
+  pthread_t *thread_enviar_mensagem = conexao.thread;
+
+  printf("id: %d and thread: %p\n", socket_cliente, thread_enviar_mensagem);
 
   int recebidos;
   char resposta[256];
@@ -122,7 +130,7 @@ void *receber_mensagem(void * argumento) {
   printf("\nExit receber_mensagem\n");
   
   //TODO (4): Quando essa thread morrer, a do enviar_mensagem também deve morrer
-
+  pthread_cancel(*thread_enviar_mensagem);
   printf("Cancelou a thread de enviar: %d\n", socket_cliente);
   pthread_exit(NULL);
 }
