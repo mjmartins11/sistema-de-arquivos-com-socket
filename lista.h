@@ -4,6 +4,8 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
 
     #define boolean int
     #define true 1
@@ -15,10 +17,10 @@
     typedef struct lista_ Lista;
 
     Lista *lista_criar();
-    void lista_inserir(Lista *l, char nome_do_cliente[TAMANHO_TEXTO], char titulo[TAMANHO_TEXTO], char conteudo[TAMANHO_CONTEUDO]);
-    void lista_imprimir(Lista *l);
-    void lista_buscar_e_imprimir(Lista *l, char titulo[TAMANHO_TEXTO]);
-    void lista_remover_documento(Lista *l, char titulo[TAMANHO_TEXTO]);
+    void lista_inserir(Lista *l, char nome_do_cliente[TAMANHO_TEXTO], char titulo[TAMANHO_TEXTO], char conteudo[TAMANHO_CONTEUDO], int socket_cliente);
+    void lista_imprimir(Lista *l, int socket_cliente);
+    void lista_buscar_e_imprimir(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cliente);
+    void lista_remover_documento(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cliente);
     //void lista_remover_registro2(Lista *l, int id, int qtd_aluno);
     void lista_sair(Lista *l);
     //int lista_aluno_qtd_id(Lista *l, int id);

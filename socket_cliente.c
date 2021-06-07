@@ -69,7 +69,7 @@ void receber_mensagem(int socket_cliente) {
   if(retorno == 0) 
     return;
   mensagem[retorno] = '\0';
-
+  
   printf("\n%s\n\n", mensagem);
 }
 
