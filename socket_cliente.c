@@ -67,20 +67,20 @@ int main() {
 
 int conexao_finalizada_pelo_cliente = 0;
 
-void escolher_opcao(char input[1]){
+void escolher_opcao(char* input){
     char nome_do_cliente[TAMANHO_TEXTO];
     char titulo[TAMANHO_TEXTO];
     char conteudo[TAMANHO_CONTEUDO];
     char titulo_aux[TAMANHO_TEXTO]; 
     int enviados;
     char mensagem[TAMANHO_TEXTO];
-    int opc = atoi(input);
+    //int opc = atoi(input[0]);
 
     //Limpando o ENTER do buffer
     char c;
     while ((c = getchar()) != '\n' && c != EOF) {}
 
-    switch (opc){
+    switch (input[0]){
       case 0:     
         printf("Qual o seu nome?\n");
         fgets(mensagem, TAMANHO_TEXTO, stdin);
@@ -125,11 +125,12 @@ void escolher_opcao(char input[1]){
 void *enviar_mensagem(void * argumento){
   pthread_t *receber_mensagem_thread = (pthread_t *) argumento;
   int enviados;
-  char mensagem[1];
+  char *mensagem = (char*) malloc(sizeof(char) * 4);
 
   do{
-    printf("Escolha uma opcao do menu! ");
-    scanf("%c", mensagem);
+    printf("Escolhendo opcao do menu!");
+    scanf("%c", &mensagem[0]);
+    strcat(mensagem, "$$$"); 
     enviados = send(socket_cliente, mensagem, 1, 0);
 
     if(strcmp(mensagem, "4") != 0) 

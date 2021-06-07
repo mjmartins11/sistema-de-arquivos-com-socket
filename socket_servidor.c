@@ -11,6 +11,8 @@
 
 #define SAIR 4
 
+Lista *l;
+
 typedef struct {
   int socket_cliente;
   pthread_t *enviar_mensagem;
@@ -48,6 +50,8 @@ int main() {
     printf("\nErro na funcao listen()\n");
     return 1;
   }
+
+  //l = lista_criar();
 
   //https://www.di.ubi.pt/~operativos/praticos/html/9-threads.html
   //https://www.ppgia.pucpr.br/~laplima/ensino/sd/lab/lab-02-sock.html
