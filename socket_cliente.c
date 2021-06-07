@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -20,7 +21,7 @@ void *enviar_mensagem(void * argumento);
 void *receber_mensagem();
 
 int main() {
-                 //Protocolo IPv4       TCP     IP
+  //               Protocolo IPv4       TCP     IP
   socket_cliente = socket(AF_INET, SOCK_STREAM, 0);
 
   if(socket_cliente == -1) {
@@ -59,8 +60,8 @@ int main() {
   pthread_create(&threads[1], &attr, receber_mensagem, NULL);
   pthread_create(&threads[0], &attr, enviar_mensagem, (void *) &threads[1]);
 
-  pthread_join(threads[0],NULL);
-  pthread_join(threads[1],NULL);
+  pthread_join(threads[0], NULL);
+  pthread_join(threads[1], NULL);
 
   return 0;
 }
@@ -139,7 +140,7 @@ void *enviar_mensagem(void * argumento){
 
   conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       
-  pthread_cancel(*receber_mensagem_thread);
+  //pthread_cancel(*receber_mensagem_thread);
   printf("cancelou a thread de enviar\n");
   pthread_exit(NULL);
 }
