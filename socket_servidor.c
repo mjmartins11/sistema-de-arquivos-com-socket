@@ -7,6 +7,8 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <semaphore.h>
+#include "lista.h"
 
 #define SAIR 4
 
@@ -82,7 +84,7 @@ void *enviar_mensagem(void * argumento) {
   char mensagem[256];
 
   //Enviando o menu para o cliente
-  char menu[228] = "************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - inserir documento\nOpcao 1 - imprimir todos os documentos\nOpcao 2 - remover documento\nOpcao 3 - buscar documento\nOpcao 4 - sair\n";
+  char menu[228] = "\n************* MENU *************\nEscolha a opcao digitando o numero correspondente a ela\nOpcao 0 - inserir documento\nOpcao 1 - imprimir todos os documentos\nOpcao 2 - remover documento\nOpcao 3 - buscar documento\nOpcao 4 - sair\n";
   enviados = send(socket_cliente, menu, strlen(menu), 0);
 
   do {  
