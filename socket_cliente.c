@@ -22,7 +22,7 @@ void *receber_mensagem();
 void *conexao();
 
 int main() {
-  //               Protocolo IPv4       TCP     IP
+  // Protocolo IPv4 TCP IP
   socket_cliente = socket(AF_INET, SOCK_STREAM, 0);
 
   if(socket_cliente == -1) {
@@ -79,12 +79,13 @@ void *enviar_mensagem(void * argumento){
   int enviados;
   char mensagem[256];
 
-  do {
-    printf("Escolher uma opcao: ");
-    fgets(mensagem, 256, stdin);
+  do{
+    printf("Cliente:\n");
+    fgets(mensagem, 256, stdin); // lendo a mensagem do servidor para enviar ao cliente
     mensagem[strlen(mensagem)-1] = '\0';
-    enviados = send(socket_cliente, &mensagem, sizeof(char), 0);
-  } while(mensagem[0] != '4');
+    printf("%s\n", mensagem);
+    enviados = send(socket_cliente, mensagem, 1, 0);
+  } while(strcmp(mensagem, "exit") != 0);
 
   conexao_finalizada_pelo_cliente = 1;
   close(socket_cliente);       
