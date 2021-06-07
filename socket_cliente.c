@@ -84,7 +84,7 @@ void *enviar_mensagem(void * argumento){
     fgets(mensagem, 256, stdin); // lendo a mensagem do servidor para enviar ao cliente
     mensagem[strlen(mensagem)-1] = '\0';
     printf("%s\n", mensagem);
-    enviados = send(socket_cliente, mensagem, 1, 0);
+    enviados = send(socket_cliente, mensagem, strlen(mensagem), 0);
   } while(strcmp(mensagem, "exit") != 0);
 
   conexao_finalizada_pelo_cliente = 1;
