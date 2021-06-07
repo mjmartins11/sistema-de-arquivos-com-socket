@@ -22,6 +22,7 @@ typedef struct {
 
 void *enviar_mensagem(void * argumento);
 void *receber_mensagem(void * argumento);
+void escolher_opcao(char resposta, int socket_cliente);
 void *conexao(void * argumento);
 
 Lista *l; // lista que armazena todos os arquivos criados pelos clientes
@@ -112,6 +113,7 @@ void *conexao(void * argumento) {
   while(operacao != '4') {
     //Realizando operação solicitada pelo cliente
     // escolher_opcao(operacao, socket_cliente);
+    escolher_opcao(operacao, socket_cliente);
     printf("Realizando operação %c\n", operacao);
     
     // Retornando resultado para o cliente
@@ -155,8 +157,6 @@ void *enviar_mensagem(void * argumento) {
 
   pthread_exit(NULL);
 }
-
-void escolher_opcao(char resposta, int socket_cliente);
 
 void *receber_mensagem(void *argumento) {
   int socket_cliente =  *(int *) argumento;
