@@ -188,6 +188,13 @@ void lista_remover_documento(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cl
     }
 }
 
+int lista_tamanho(Lista *l){
+    if(!lista_vazia(l)){
+        return l->tamanho;
+    }
+    return 0;
+}
+
 /*void lista_remover_registro2(Lista *l, int id, int qtd_aluno) {
     if (!lista_vazia(l)) {
         while (qtd_aluno > 0) {

@@ -114,7 +114,7 @@ void escolher_opcao(char resposta, int socket_cliente) {
   char titulo[TAMANHO_TEXTO];
   char conteudo[TAMANHO_CONTEUDO];
   char mensagem[TAMANHO_TEXTO];
-  int recebidos;
+  int recebidos, lista_tam;
 
   switch(resposta){
     case '0':   // Incluir novo documento
@@ -147,6 +147,9 @@ void escolher_opcao(char resposta, int socket_cliente) {
       break;
 
     case '1':   // Imprimir lista completa de documentos
+      lista_tam = lista_tamanho(l);
+      printf("%d\n", lista_tam);
+      send(socket_cliente, &lista_tam, sizeof(int), 0);
       lista_imprimir(l, socket_cliente);
       break;
 

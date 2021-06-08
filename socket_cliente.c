@@ -125,6 +125,8 @@ void *conexao() {
         break;
 
       case '1':
+        //Recebendo "Qual o titulo a ser removido?"
+        receber_mensagem(socket_cliente);
         printf("\n");
         break;
 
