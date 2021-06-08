@@ -62,6 +62,8 @@ void limpar_buffer() {
 }
 
 void receber_mensagem(int socket_cliente) {
+  printf("receber mensagem\n");
+  
   int retorno;
   char mensagem[256];
 
@@ -138,18 +140,20 @@ void *conexao() {
 
         quantidade_de_itens = resposta - '0';
         printf("qtd: %d\n", quantidade_de_itens);
-
-        //Recebendo mensagem titulo
-        receber_mensagem(socket_cliente);
-
-        for(int i = 0; i < quantidade_de_itens; i++) {
-          printf("executando\n");
-          //Recebendo arquivo
+      
+        if(quantidade_de_itens > 0) {
+          printf(".:: Lista de documentos ::.");
+          for(int i = 0; i < quantidade_de_itens; i++) {
+            printf("executando\n");
+            //Recebendo arquivo
+            receber_mensagem(socket_cliente);
+          }
+          printf("saiu\n");
+        } else {
+          //Recebendo mensagem de resposta
           receber_mensagem(socket_cliente);
         }
-
-        printf("saiu\n");
-
+    
         printf("\n");        
         break;
 

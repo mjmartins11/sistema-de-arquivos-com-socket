@@ -22,9 +22,7 @@
     void lista_buscar_e_imprimir(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cliente);
     void lista_remover_documento(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cliente);
     int lista_tamanho(Lista *l);
-    //void lista_remover_registro2(Lista *l, int id, int qtd_aluno);
     void lista_sair(Lista *l);
-    //int lista_aluno_qtd_id(Lista *l, int id);
     boolean lista_vazia(Lista *l);
 
 #endif

@@ -72,6 +72,7 @@ int main() {
   }
 
   sem_destroy(&mutex);
+  lista_sair(l);
 
   printf("INFO: O servidor foi encerrado.\n");
   return 0;
@@ -94,7 +95,8 @@ void *conexao(void * argumento) {
   while(operacao != '4') {
     //Realizando operação solicitada pelo cliente
     printf("INFO: Realizando operação %c para o cliente %d.\n", operacao, socket_cliente);
-    escolher_opcao(operacao, socket_cliente);
+    if(operacao != '4')
+      escolher_opcao(operacao, socket_cliente);
 
     //Aguardando resposta de nova operação do cliente
     retorno = recv(socket_cliente, &operacao, 256, 0);
@@ -122,25 +124,17 @@ void escolher_opcao(char resposta, int socket_cliente) {
       strcpy(mensagem, "Qual o seu nome?");
       send(socket_cliente, mensagem, TAMANHO_TEXTO, 0);
       recebidos = recv(socket_cliente, nome_do_cliente, TAMANHO_TEXTO, 0);
-      //scanf(" %[^\n]s", nome_do_cliente);
-      printf("strlen nome do cliente %ld\n", strlen(nome_do_cliente));
       nome_do_cliente[strlen(nome_do_cliente)] = '\0';
-      printf("%s\n", nome_do_cliente);
 
       strcpy(mensagem, "Insira o titulo do documento");
       send(socket_cliente, mensagem, TAMANHO_TEXTO, 0);
       recebidos = recv(socket_cliente, titulo, TAMANHO_TEXTO, 0);
-      //scanf(" %[^\n]s", titulo);
-      printf("strlen titulo %ld\n", strlen(titulo));
       titulo[recebidos] = '\0';
-      printf("%s\n", titulo);
 
       strcpy(mensagem, "Insira o conteudo do documento");
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
       recv(socket_cliente, conteudo, TAMANHO_CONTEUDO, 0);
-      //scanf(" %[^\n]s", conteudo);
       conteudo[strlen(conteudo)] = '\0';
-      printf("%s\n", conteudo);
 
       sem_wait(&mutex);
       lista_inserir(l, nome_do_cliente, titulo, conteudo, socket_cliente);
@@ -154,12 +148,10 @@ void escolher_opcao(char resposta, int socket_cliente) {
       break;
 
     case '2':   // Remover documento
-      //printf("Qual o titulo a ser removido?\n");
-      //scanf(" %[^\n]s", titulo_aux);
-      //titulo_aux[strlen(titulo_aux)] = '\0';
       strcpy(mensagem, "Qual o titulo a ser removido?\n");
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
       recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
+
       sem_wait(&mutex);
       lista_remover_documento(l, titulo, socket_cliente);
       sem_post(&mutex);
@@ -172,10 +164,6 @@ void escolher_opcao(char resposta, int socket_cliente) {
       recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
       lista_buscar_e_imprimir(l, titulo, socket_cliente);
       break;
-
-    /*case '4':   // 
-      lista_sair(l);
-      break;*/
       
     default:
       strcpy(mensagem, "Escolha de opcao invalida\n\0");

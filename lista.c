@@ -85,27 +85,23 @@ void lista_imprimir(Lista *l, int socket_cliente) {
     char mensagem[TAMANHO_CONTEUDO + (2*TAMANHO_TEXTO)];
     if (!lista_vazia(l)) {
         No *no_aux = l->inicio;
-        strcpy(mensagem, ".:: Lista de documentos ::.");
-        send(socket_cliente, mensagem, strlen(mensagem), 0);
-        //printf(".:: Lista de documentos ::.\n");
+        // strcpy(mensagem, ".:: Lista de documentos ::.");
+        // send(socket_cliente, mensagem, strlen(mensagem), 0);
+
         while (no_aux != NULL) {
             //printf("Titulo: %s\n", no_aux->a->titulo);
             strcpy(mensagem, "\nTitulo: ");
             strcat(mensagem, no_aux->a->titulo);
             strcat(mensagem, "\0");
-            //send(socket_cliente, mensagem, strlen(mensagem), 0);
-            //printf("Autor: %s\n", no_aux->a->nome_do_cliente);
 
             strcat(mensagem, "\nAutor: ");
             strcat(mensagem, no_aux->a->nome_do_cliente);
             strcat(mensagem, "\0");
-            //send(socket_cliente, mensagem, strlen(mensagem), 0);
 
             strcat(mensagem, "\nConteudo: ");
             strcat(mensagem, no_aux->a->conteudo);
             strcat(mensagem, "\n");
             send(socket_cliente, mensagem, strlen(mensagem), 0);
-            //printf("Conteudo: %s\n\n", no_aux->a->conteudo);
 
             printf("aqui\n");
 
@@ -120,18 +116,17 @@ void lista_imprimir(Lista *l, int socket_cliente) {
 
 void lista_buscar_e_imprimir(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cliente) {
     char mensagem[TAMANHO_CONTEUDO + (2*TAMANHO_TEXTO)];
+
     if (!lista_vazia(l)) {
         No *no_aux = lista_buscar(l, titulo);
         if (no_aux != NULL) {
             strcpy(mensagem, "Titulo: ");
             strcat(mensagem, no_aux->a->titulo);
             strcat(mensagem, "\0");
-            //send(socket_cliente, mensagem, strlen(mensagem), 0);
 
             strcat(mensagem, "\nAutor: ");
             strcat(mensagem, no_aux->a->nome_do_cliente);
             strcat(mensagem, "\0");
-            //send(socket_cliente, mensagem, strlen(mensagem), 0);
 
             strcat(mensagem, "\nConteudo: ");
             strcat(mensagem, no_aux->a->conteudo);
@@ -192,37 +187,6 @@ int lista_tamanho(Lista *l){
     return 0;
 }
 
-/*void lista_remover_registro2(Lista *l, int id, int qtd_aluno) {
-    if (!lista_vazia(l)) {
-        while (qtd_aluno > 0) {
-            No *atual = l->inicio;
-            No *no_aux = NULL;
-            while (atual != NULL && aluno_id(atual->a) != id) {
-                no_aux = atual;
-                atual = atual->proximo_no;
-            }
-            if (atual != NULL) {
-                if (atual == l->inicio) {
-                    l->inicio = atual->proximo_no;
-                } else {
-                    no_aux->proximo_no = atual->proximo_no;
-                }
-                atual->proximo_no = NULL;
-                if (atual == l->fim) {
-                    l->fim = no_aux;
-                }
-                l->tamanho--;
-                aluno_remover(atual->a);
-                free(atual);
-            }
-            qtd_aluno--;
-        }
-        printf("Registros removidos com sucesso.\n");
-    } else {
-        printf("A lista esta vazia.\n");
-    }
-}*/
-
 void lista_sair(Lista *l) {
     if (!lista_vazia(l)) {
         No *atual = l->inicio;
@@ -237,20 +201,6 @@ void lista_sair(Lista *l) {
         free(l);
     }
 }
-
-/*int lista_aluno_qtd_id(Lista *l, int id) {
-    int qtd = 0;
-    if (!lista_vazia(l)) {
-        No *no_aux = (No*) malloc(sizeof(No));
-        no_aux = l->inicio;
-        while (no_aux != NULL) {
-            if (aluno_id(no_aux->a) == id)
-                qtd++;
-            no_aux = no_aux->proximo_no;
-        }
-    }
-    return qtd;
-}*/
 
 boolean lista_vazia(Lista *l) {
     if (l != NULL && l->inicio == NULL)
