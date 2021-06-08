@@ -31,7 +31,6 @@ No* lista_buscar(Lista *l, char titulo[TAMANHO_TEXTO]) {
     if (!lista_vazia(l)) {
         No *aux = l->inicio;
         while (aux != NULL && strcmp(aux->a->titulo, titulo)) {
-            printf("titulo atual:%s\n", aux->a->titulo);
             aux = aux->proximo_no;
         }
 
@@ -47,7 +46,7 @@ void lista_inserir(Lista *l, char nome_do_cliente[TAMANHO_TEXTO], char titulo[TA
     if (l != NULL) {
 
         if (lista_buscar(l, titulo) != NULL) {
-            printf("O documento ja existe.\n");
+            printf("INFO: O documento ja existe.\n");
             strcpy(mensagem, "O documento ja existe.");
             send(socket_cliente, mensagem, strlen(mensagem), 0);
             return;
@@ -69,11 +68,11 @@ void lista_inserir(Lista *l, char nome_do_cliente[TAMANHO_TEXTO], char titulo[TA
             a_novo->proximo_no = NULL;
             l->fim = a_novo;
             l->tamanho++;
-            printf("Documento inserido com sucesso.");
+            printf("INFO: Documento inserido com sucesso.");
             strcpy(mensagem, "Documento inserido com sucesso.");
             send(socket_cliente, mensagem, strlen(mensagem), 0);
         } else {
-            printf("Falha ao inserir documento.");
+            printf("INFO: Falha ao inserir documento.");
             strcpy(mensagem, "Falha ao inserir documento.");
             send(socket_cliente, mensagem, strlen(mensagem), 0);
         }
@@ -82,34 +81,32 @@ void lista_inserir(Lista *l, char nome_do_cliente[TAMANHO_TEXTO], char titulo[TA
 }
 
 void lista_imprimir(Lista *l, int socket_cliente) {
-    char mensagem[TAMANHO_CONTEUDO + (2*TAMANHO_TEXTO)];
     if (!lista_vazia(l)) {
+        int lista_tam = lista_tamanho(l);
+        char mensagem[lista_tam * (TAMANHO_CONTEUDO + (2*TAMANHO_TEXTO))];
         No *no_aux = l->inicio;
-        // strcpy(mensagem, ".:: Lista de documentos ::.");
-        // send(socket_cliente, mensagem, strlen(mensagem), 0);
+        strcpy(mensagem, ".:: Lista de documentos ::.");
 
         while (no_aux != NULL) {
-            //printf("Titulo: %s\n", no_aux->a->titulo);
-            strcpy(mensagem, "\nTitulo: ");
+            strcat(mensagem, "\nTitulo: ");
             strcat(mensagem, no_aux->a->titulo);
-            strcat(mensagem, "\0");
 
             strcat(mensagem, "\nAutor: ");
             strcat(mensagem, no_aux->a->nome_do_cliente);
-            strcat(mensagem, "\0");
 
             strcat(mensagem, "\nConteudo: ");
             strcat(mensagem, no_aux->a->conteudo);
             strcat(mensagem, "\n");
-            send(socket_cliente, mensagem, strlen(mensagem), 0);
-
-            printf("aqui\n");
 
             no_aux = no_aux->proximo_no;
         }
+        strcat(mensagem, "\0");
+        send(socket_cliente, mensagem, strlen(mensagem), 0);
+        
     } else {
-        //printf("A lista esta vazia.\n");
-        strcpy(mensagem, "A lista esta vazia.");
+        char mensagem[TAMANHO_TEXTO];
+
+        strcpy(mensagem, "A lista esta vazia.\n\0");
         send(socket_cliente, mensagem, strlen(mensagem), 0);
     }
 }
@@ -165,16 +162,15 @@ void lista_remover_documento(Lista *l, char titulo[TAMANHO_TEXTO], int socket_cl
             l->tamanho--;
             free(atual->a);
             free(atual);
-            printf("Documento removido com sucesso.\n");
+            printf("INFO: Documento removido com sucesso.\n");
             strcpy(mensagem, "Documento removido com sucesso.\n\0");
             send(socket_cliente, mensagem, strlen(mensagem), 0);
         } else {
-            printf("Documento inexistente.\n");
+            printf("INFO: Documento inexistente.\n");
             strcpy(mensagem, "Documento inexistente.\n\0");
             send(socket_cliente, mensagem, strlen(mensagem), 0);
         }
     } else {
-        printf("A lista esta vazia.\n");
         strcpy(mensagem, "A lista esta vazia.\n\0");
         send(socket_cliente, mensagem, strlen(mensagem), 0);
     }

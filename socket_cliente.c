@@ -62,8 +62,6 @@ void limpar_buffer() {
 }
 
 void receber_mensagem(int socket_cliente) {
-  printf("receber mensagem\n");
-  
   int retorno;
   char mensagem[256];
 
@@ -90,9 +88,6 @@ void *conexao() {
   int retorno;
   char operacao;
   char mensagem[256];
-
-  int quantidade_de_itens;
-  char resposta;
   
   //Recebendo o menu do servidor
   retorno = recv(socket_cliente, mensagem, 256, 0);
@@ -133,27 +128,9 @@ void *conexao() {
         break;
 
       case '1':
-        //Recebendo quantidade de itens na lista
-        retorno = recv(socket_cliente, &resposta, sizeof(char), 0);
-        if(retorno == 0) 
-          break;
-
-        quantidade_de_itens = resposta - '0';
-        printf("qtd: %d\n", quantidade_de_itens);
-      
-        if(quantidade_de_itens > 0) {
-          printf(".:: Lista de documentos ::.");
-          for(int i = 0; i < quantidade_de_itens; i++) {
-            printf("executando\n");
-            //Recebendo arquivo
-            receber_mensagem(socket_cliente);
-          }
-          printf("saiu\n");
-        } else {
-          //Recebendo mensagem de resposta
-          receber_mensagem(socket_cliente);
-        }
-    
+        //Recebendo arquivo
+        receber_mensagem(socket_cliente);
+        
         printf("\n");        
         break;
 

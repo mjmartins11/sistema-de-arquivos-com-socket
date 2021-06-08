@@ -95,8 +95,7 @@ void *conexao(void * argumento) {
   while(operacao != '4') {
     //Realizando operação solicitada pelo cliente
     printf("INFO: Realizando operação %c para o cliente %d.\n", operacao, socket_cliente);
-    if(operacao != '4')
-      escolher_opcao(operacao, socket_cliente);
+    escolher_opcao(operacao, socket_cliente);
 
     //Aguardando resposta de nova operação do cliente
     retorno = recv(socket_cliente, &operacao, 256, 0);
@@ -110,8 +109,6 @@ void *conexao(void * argumento) {
 }
 
 void escolher_opcao(char resposta, int socket_cliente) {
-  /* Ainda precisa pensar em como criar uma Lista de modo que ela não seja criada toda vez
-    que essa função é chamada, pois assim perderá as informações salvas. */
   char nome_do_cliente[TAMANHO_TEXTO];
   char titulo[TAMANHO_TEXTO];
   char conteudo[TAMANHO_CONTEUDO];
@@ -124,17 +121,20 @@ void escolher_opcao(char resposta, int socket_cliente) {
       strcpy(mensagem, "Qual o seu nome?");
       send(socket_cliente, mensagem, TAMANHO_TEXTO, 0);
       recebidos = recv(socket_cliente, nome_do_cliente, TAMANHO_TEXTO, 0);
-      nome_do_cliente[strlen(nome_do_cliente)] = '\0';
+      if(recebidos == 0) return;
+      nome_do_cliente[recebidos] = '\0';
 
       strcpy(mensagem, "Insira o titulo do documento");
       send(socket_cliente, mensagem, TAMANHO_TEXTO, 0);
       recebidos = recv(socket_cliente, titulo, TAMANHO_TEXTO, 0);
+      if(recebidos == 0) return;
       titulo[recebidos] = '\0';
 
       strcpy(mensagem, "Insira o conteudo do documento");
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
-      recv(socket_cliente, conteudo, TAMANHO_CONTEUDO, 0);
-      conteudo[strlen(conteudo)] = '\0';
+      recebidos = recv(socket_cliente, conteudo, TAMANHO_CONTEUDO, 0);
+      if(recebidos == 0) return;
+      conteudo[recebidos] = '\0';
 
       sem_wait(&mutex);
       lista_inserir(l, nome_do_cliente, titulo, conteudo, socket_cliente);
@@ -142,15 +142,14 @@ void escolher_opcao(char resposta, int socket_cliente) {
       break;
 
     case '1':   // Imprimir lista completa de documentos
-      lista_tam = lista_tamanho(l)+'0';
-      send(socket_cliente, &lista_tam, sizeof(char), 0);
       lista_imprimir(l, socket_cliente);
       break;
 
     case '2':   // Remover documento
       strcpy(mensagem, "Qual o titulo a ser removido?\n");
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
-      recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
+      recebidos = recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
+      if(recebidos == 0) return;
 
       sem_wait(&mutex);
       lista_remover_documento(l, titulo, socket_cliente);
@@ -161,7 +160,8 @@ void escolher_opcao(char resposta, int socket_cliente) {
       printf("Qual o titulo desejado?\n");
       strcpy(mensagem, "Qual o titulo desejado?\n");
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
-      recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
+      recebidos = recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
+      if(recebidos == 0) return;
       lista_buscar_e_imprimir(l, titulo, socket_cliente);
       break;
       
