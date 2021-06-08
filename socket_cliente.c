@@ -70,7 +70,7 @@ void receber_mensagem(int socket_cliente) {
     return;
   mensagem[retorno] = '\0';
 
-  printf("\n%s\n\n", mensagem);
+  printf("\n%s\n", mensagem);
 }
 
 void enviar_mensagem(int socket_cliente) {
@@ -88,6 +88,9 @@ void *conexao() {
   int retorno;
   char operacao;
   char mensagem[256];
+
+  int quantidade_de_itens;
+  char resposta;
   
   //Recebendo o menu do servidor
   retorno = recv(socket_cliente, mensagem, 256, 0);
@@ -121,13 +124,33 @@ void *conexao() {
         //Respondendo o conteudo
         enviar_mensagem(socket_cliente);
 
+        //Recebendo resultado da operação
+        receber_mensagem(socket_cliente);
+
         printf("\n");
         break;
 
       case '1':
-        //Recebendo "Qual o titulo a ser removido?"
+        //Recebendo quantidade de itens na lista
+        retorno = recv(socket_cliente, &resposta, sizeof(char), 0);
+        if(retorno == 0) 
+          break;
+
+        quantidade_de_itens = resposta - '0';
+        printf("qtd: %d\n", quantidade_de_itens);
+
+        //Recebendo mensagem titulo
         receber_mensagem(socket_cliente);
-        printf("\n");
+
+        for(int i = 0; i < quantidade_de_itens; i++) {
+          printf("executando\n");
+          //Recebendo arquivo
+          receber_mensagem(socket_cliente);
+        }
+
+        printf("saiu\n");
+
+        printf("\n");        
         break;
 
       case '2':
