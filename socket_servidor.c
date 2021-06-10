@@ -150,6 +150,7 @@ void escolher_opcao(char resposta, int socket_cliente) {
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
       recebidos = recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
       if(recebidos == 0) return;
+      titulo[recebidos] = '\0';
 
       sem_wait(&mutex);
       lista_remover_documento(l, titulo, socket_cliente);
@@ -162,6 +163,7 @@ void escolher_opcao(char resposta, int socket_cliente) {
       send(socket_cliente, mensagem, TAMANHO_CONTEUDO, 0);
       recebidos = recv(socket_cliente, titulo, TAMANHO_CONTEUDO, 0);
       if(recebidos == 0) return;
+      titulo[recebidos] = '\0';
       lista_buscar_e_imprimir(l, titulo, socket_cliente);
       break;
       
